@@ -1,0 +1,12 @@
+<RCC>
+    <qresource prefix="/res">
+    </qresource>
+    <qresource prefix="/res/meshes">
+        <file alias="king.mesh">res/meshes/king.mesh</file>
+        <file alias="queen.mesh">res/meshes/queen.mesh</file>
+        <file alias="bishop.mesh">res/meshes/bishop.mesh</file>
+        <file alias="knight.mesh">res/meshes/knight.mesh</file>
+        <file alias="rook.mesh">res/meshes/rook.mesh</file>
+        <file alias="pawn.mesh">res/meshes/pawn.mesh</file>
+    </qresource>
+</RCC>
