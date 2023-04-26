@@ -4,13 +4,13 @@ var _generateUUID = function () {
     return uuid.v4()
 }
 
-const chess = require('chess')
+import chess from 'chess'
+import _ from 'lodash'
+import fs from 'fs'
+import uuid from 'node-uuid'
+import WebSocket, { WebSocketServer } from 'ws';
 
-var _ = require('lodash'),
-fs = require("fs"),
-uuid = require('node-uuid'),
-WebSocketServer = require('ws').Server,
-wss = new WebSocketServer({ port: 9001 }),
+var wss = new WebSocketServer({ port: 9001 }),
 games = {},
 gamesWaitingForPlayers = {},
 GAME_TICK_LENGTH = 200, //ms
@@ -58,6 +58,7 @@ setInterval(function () {
 
     // Loop through games and update player/ghost positions
     _.forEach(games, function (game) {
+
     })
 
     if (!_.isEmpty(games)) {
