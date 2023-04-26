@@ -2,6 +2,8 @@
     <qresource prefix="/qml">
         <file alias="main.qml">qml/main.qml</file>
         <file alias="ChessBoard.qml">qml/ChessBoard.qml</file>
+        <file alias="ChessPieces.qml">qml/ChessPieces.qml</file>
+        <file alias="PieceSelector.qml">qml/PieceSelector.qml</file>
     </qresource>
     <qresource prefix="/qml/pieces">
         <file alias="ChessPiece.qml">qml/pieces/ChessPiece.qml</file>

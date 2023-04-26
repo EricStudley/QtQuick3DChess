@@ -1,0 +1,19 @@
+{
+  "name": "qtquick3dchess",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "chess": "^1.1.0",
+    "fs": "0.0.1-security",
+    "lodash": "^4.17.21",
+    "node-uuid": "^1.4.8",
+    "ws": "^8.13.0"
+  }
+}

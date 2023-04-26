@@ -3,7 +3,7 @@ import QtQuick3D
 
 Model {
     objectName: "King"
-    scale: Qt.vector3d(100, 100, 100)
+    scale: Qt.vector3d(squareSize, squareSize, squareSize)
     eulerRotation: dark ? Qt.vector3d(0, 0, 180) : Qt.vector3d(0, 0, 0)
     source: "qrc:/res/meshes/king.mesh"
     pickable: true
@@ -12,13 +12,13 @@ Model {
     property bool highlighted: false
 
     materials: [
-        DefaultMaterial {
-            diffuseColor: "#FFCCCCCC"
-        },
-        DefaultMaterial {
-            diffuseColor: highlighted ? "#FF5CB3FF"
-                                      : dark ? "#FF2C2C35"
-                                             : "#FFFFDB9F"
+        PrincipledMaterial {
+            baseColor: highlighted ? "#FF5CB3FF"
+                                   : dark ? "#FF2C2C35"
+                                          : "#FFFFDB9F"
+            roughness: 0.6
+            cullMode: Material.NoCulling
+            alphaMode: PrincipledMaterial.Opaque
         }
     ]
 }

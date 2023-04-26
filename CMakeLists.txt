@@ -12,6 +12,10 @@ qt_add_executable(QtQuick3DChess
     qml.qrc
     res.qrc
     src/main.cpp
+    src/ChessModel.h
+    src/ChessModel.cpp
+    src/ChessPiece.h
+    src/ChessPiece.cpp
 )
 
 set_target_properties(QtQuick3DChess PROPERTIES

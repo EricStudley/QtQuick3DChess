@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick3D
 import QtQuick3D.Helpers
 import QtQuick.Controls
+import QtWebSockets
 
 Window {
     id: window
@@ -16,12 +17,27 @@ Window {
     property int squareCount: 64
     property int boardWidth: squareSize * rowCount
 
+    WebSocket {
+        id: socket
+        url: "ws://localhost:9001"
+        active: true
+
+        onStatusChanged: {
+            if (socket.status === WebSocket.Open) {
+                console.log("Client connected.")
+                socket.sendTextMessage("{\"command\":\"join\"}")
+            }
+        }
+
+        onTextMessageReceived: (message) => chessModel.processMessage(JSON.parse(message))
+    }
+
     View3D {
         id: view3D
         anchors { fill: parent }
 
         environment: SceneEnvironment {
-            clearColor: "grey"
+            clearColor: "skyblue"
             backgroundMode: SceneEnvironment.Color
             antialiasingMode: SceneEnvironment.MSAA
             antialiasingQuality: SceneEnvironment.VeryHigh
@@ -33,67 +49,34 @@ Window {
             anchors { fill: parent }
             origin: scene
             camera: perspectiveCamera
-            rotation: 90
         }
 
         DirectionalLight {
-            eulerRotation.x: -45
+            eulerRotation.y: -45
             ambientColor: Qt.darker("slategrey")
             castsShadow: true
+            shadowFactor: 50
+            shadowMapQuality: Light.ShadowMapQualityHigh
         }
 
-        PerspectiveCamera {
+        OrthographicCamera {
             id: perspectiveCamera
-            eulerRotation.z: 90
-            position: Qt.vector3d(1000, 0, 1000)
+            position: Qt.vector3d(0, -1300, 1000)
             lookAtNode: scene
         }
 
         Node {
             id: scene
+            eulerRotation.z: -45
 
             ChessBoard {
                 x: (squareSize / 2) - (boardWidth / 2)
                 y: x
+
+                ChessPieces { }
             }
         }
 
-        MouseArea {
-            z: 1000
-            anchors { fill: parent }
-
-            property var selectedPiece
-
-            onClicked: (mouse) => {
-                           var result = view3D.pick(mouse.x, mouse.y)
-
-                           if (result.objectHit) {
-                               var objectHit = result.objectHit
-
-                               if (objectHit.objectName) {
-                                   if (selectedPiece) {
-                                       selectedPiece.highlighted = false
-                                   }
-
-                                   if (objectHit !== selectedPiece) {
-                                       selectedPiece = objectHit
-                                       selectedPiece.highlighted = true
-                                   }
-                                   else {
-                                       selectedPiece.highlighted = false
-                                       selectedPiece = {}
-                                   }
-                               }
-                               else {
-                                   if (selectedPiece) {
-                                       selectedPiece.x = objectHit.x
-                                       selectedPiece.y = objectHit.y
-                                       selectedPiece.highlighted = false
-                                       selectedPiece = {}
-                                   }
-                               }
-                           }
-                       }
-        }
+        PieceSelector { }
     }
 }
