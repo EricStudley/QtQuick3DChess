@@ -2,9 +2,12 @@
 
 #include <QDebug>
 #include <QJsonObject>
+#include <QJsonArray>
+
+#include "ChessEnums.h"
 
 ChessModel::ChessModel(QObject* parent) :
-      QAbstractListModel(parent)
+    QAbstractListModel(parent)
 {
 }
 
@@ -19,139 +22,99 @@ QVariant ChessModel::data(const QModelIndex& index, int role) const
         return {};
 
     const int row = index.row();
-    const QString key = m_objectUuids.at(row);
-    const ChessPiece* object = m_objects[key];
+    const ChessSquare* object = m_objects[row];
 
-    if (role == UuidRole)
-        return object->uuid();
-    else if (role == TypeRole)
-        return object->type();
-    else if (role == StateRole)
-        return object->state();
-    else if (role == StyleRole)
-        return object->style();
-    else if (role == PositionRole)
-        return object->position();
-    else if (role == DirectionRole)
-        return object->direction();
-    else if (role == MovingRole)
-        return object->moving();
+    if (role == TypeRole)
+        return object->piece().type();
+    else if (role == FileRole)
+        return object->file();
+    else if (role == RankRole)
+        return object->rank();
+    else if (role == DarkRole)
+        return object->piece().dark();
 
     return {};
-}
-
-bool ChessModel::setData(const QModelIndex& index, const QVariant& value, int role)
-{
-    if (!index.isValid())
-        return false;
-
-    const int row = index.row();
-    const QString key = m_objectUuids.at(row);
-    ChessPiece* object = m_objects[key];
-
-    if (role == UuidRole)
-        object->setUuid(value.toString());
-    else if (role == TypeRole)
-        object->setType(value.value<ChessPiece::PieceType>());
-    else if (role == StateRole)
-        object->setState(value.toString());
-    else if (role == StyleRole)
-        object->setStyle(value.toInt());
-    else if (role == PositionRole)
-        object->setPosition(value.toPoint());
-    else if (role == DirectionRole)
-        object->setDirection(value.toInt());
-    else if (role == MovingRole)
-        object->setMoving(value.toBool());
-
-    emit dataChanged(index, index);
-
-    return true;
 }
 
 QHash<int, QByteArray> ChessModel::roleNames() const
 {
     QHash<int, QByteArray> roles;
-    roles[UuidRole] = "role_uuid";
     roles[TypeRole] = "role_type";
-    roles[StateRole] = "role_state";
-    roles[StyleRole] = "role_style";
-    roles[PositionRole] = "role_position";
-    roles[MovingRole] = "role_moving";
-    roles[DirectionRole] = "role_direction";
+    roles[RankRole] = "role_rank";
+    roles[FileRole] = "role_file";
+    roles[DarkRole] = "role_dark";
     return roles;
 }
 
 void ChessModel::processMessage(const QJsonObject& message)
 {
-    qDebug() << message;
+    if (message.isEmpty())
+        return;
+
+    QJsonValue objectList = message["objects"];
+
+    QJsonArray playerObjects = objectList["event"].toObject()["board"].toObject()["squares"].toArray();
+
+    beginResetModel();
+
+    m_objects.clear();
+
+    for (const QJsonValue& updatedValue : playerObjects) {
+        QJsonObject updatedObject = updatedValue.toObject();
+        QChar file = updatedObject["file"].toString().front();
+        int rank = updatedObject["rank"].toInt();
+
+        ChessSquare* newObject = new ChessSquare(rank, file);
+
+        QJsonObject pieceObject = updatedObject["piece"].toObject();
+
+        if (!pieceObject.isEmpty()) {
+            QString typeString = pieceObject["type"].toString();
+            PieceType type = ChessEnums::fromString(typeString);
+
+            QJsonObject side = pieceObject["side"].toObject();
+            QString sideName = side["name"].toString();
+            ChessPiece piece = ChessPiece(type, sideName != "white");
+            newObject->setPiece(piece);
+        }
+
+        m_objects += newObject;
+    }
+
+    endResetModel();
+
+
+
+    //        if (m_objects.contains(uuid)) {
+    //            oldUuidSet.insert(uuid);
+
+    //            int objectIndex = m_objectUuids.indexOf(uuid);
+
+    //            setData(index(objectIndex, 0), type, TypeRole);
+    //            setData(index(objectIndex, 0), rank, RankRole);
+    //            setData(index(objectIndex, 0), file, FileRole);
+    //            setData(index(objectIndex, 0), dark, DarkRole);
+    //        }
+    //        else {
+    //            ChessSquare* newObject = new ChessSquare();
+    //            newObject->setType(static_cast<ChessEnums::PieceType>(type));
+
+    //            beginInsertRows(QModelIndex(), m_objectUuids.length(), m_objectUuids.length());
+    //            m_objects[uuid] = newObject;
+    //            m_objectUuids.append(uuid);
+    //            endInsertRows();
+    //        }
+
+    //        newUuidSet.insert(uuid);
+    //    }
+
+    //    const QSet<QString> removedUuidSet = oldUuidSet - newUuidSet;
+
+    //    for (const QString& removedUuid : removedUuidSet) {
+    //        int objectIndex = m_objectUuids.indexOf(removedUuid);
+    //        beginRemoveRows(QModelIndex(), objectIndex, objectIndex);
+    //        m_objects.remove(removedUuid);
+    //        m_objectUuids.removeAll(removedUuid);
+    //        endRemoveRows();
+    //    }
 }
-
-//void ChessModel::updateObjects(const QJsonObject& updatedObjects)
-//{
-//    if (updatedObjects.isEmpty())
-//        return;
-
-//    QSet<QString> oldUuidSet;
-//    QSet<QString> newUuidSet;
-
-//    for (const QJsonValue& updatedValue : updatedObjects) {
-//        QJsonObject updatedObject = updatedValue.toObject();
-//        QString uuid = updatedObject.value("uuid").toString();
-//        int style = updatedObject.value("style").toInt();
-//        int x = updatedObject.value("x").toInt();
-//        int y = updatedObject.value("y").toInt();
-//        QPoint position = QPoint(x, y);
-//        bool moving = updatedObject.value("moving").toBool();
-//        int direction = updatedObject.value("direction").toInt();
-//        int type = updatedObject.value("type").toInt();
-//        QString state = updatedObject.value("state").toString();
-//        bool alive = updatedObject.value("is_alive").toBool();
-
-//        if (!alive) {
-
-//            if (m_objects.contains(uuid)) {
-//                oldUuidSet.insert(uuid);
-//            }
-//            continue;
-//        }
-
-//        if (m_objects.contains(uuid)) {
-//            oldUuidSet.insert(uuid);
-
-//            int objectIndex = m_objectUuids.indexOf(uuid);
-
-//            setData(index(objectIndex, 0), style, StyleRole);
-//            setData(index(objectIndex, 0), position, PositionRole);
-//            setData(index(objectIndex, 0), moving, MovingRole);
-//            setData(index(objectIndex, 0), direction, DirectionRole);
-//        }
-//        else {
-//            ChessPiece* newObject = new ChessPiece();
-//            newObject->setUuid(uuid);
-//            newObject->setType(static_cast<ChessPiece::PieceType>(type));
-//            newObject->setState(state);
-//            newObject->setStyle(style);
-//            newObject->setPosition(position);
-//            newObject->setDirection(direction);
-//            newObject->setMoving(moving);
-
-//            beginInsertRows(QModelIndex(), m_objectUuids.length(), m_objectUuids.length());
-//            m_objects[uuid] = newObject;
-//            m_objectUuids.append(uuid);
-//            endInsertRows();
-//        }
-
-//        newUuidSet.insert(uuid);
-//    }
-
-//    const QSet<QString> removedUuidSet = oldUuidSet - newUuidSet;
-
-//    for (const QString& removedUuid : removedUuidSet) {
-//        int objectIndex = m_objectUuids.indexOf(removedUuid);
-//        beginRemoveRows(QModelIndex(), objectIndex, objectIndex);
-//        m_objects.remove(removedUuid);
-//        m_objectUuids.removeAll(removedUuid);
-//        endRemoveRows();
-//    }
-//}

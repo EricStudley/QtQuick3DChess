@@ -30,7 +30,7 @@ var addPlayerToGameQueue = function (uuid, ws, game_id) {
 
         gamesWaitingForPlayers = {
             game_id: game_id,
-            players: [uuid],
+            players: [uuid]
         }
     }
     else { // other players are also waiting to join a game on this map
@@ -58,7 +58,9 @@ setInterval(function () {
 
     // Loop through games and update player/ghost positions
     _.forEach(games, function (game) {
-
+        const gameClient = chess.create();
+        gameClient.move("a4");
+        game.event = gameClient.getStatus();
     })
 
     if (!_.isEmpty(games)) {

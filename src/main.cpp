@@ -3,6 +3,7 @@
 #include <QQmlContext>
 
 #include "ChessModel.h"
+#include "ChessEnums.h"
 
 int main(int argc, char *argv[])
 {
@@ -10,6 +11,8 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
 
     ChessModel* chessModel = new ChessModel(&app);
+
+    qmlRegisterUncreatableType<ChessEnums>("Chess", 1, 0, "PieceType", "Error: Piece is an uncreatable enum type.");
     engine.rootContext()->setContextProperty("chessModel", chessModel);
 
     const QUrl url(QStringLiteral("qrc:/qml/main.qml"));

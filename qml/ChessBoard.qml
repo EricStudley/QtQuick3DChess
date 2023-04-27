@@ -2,8 +2,6 @@ import QtQuick
 import QtQuick3D
 import QtQuick3D.Helpers
 
-import "pieces"
-
 Node {
 
     Repeater3D {
