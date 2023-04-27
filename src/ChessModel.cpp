@@ -48,12 +48,14 @@ QHash<int, QByteArray> ChessModel::roleNames() const
 
 void ChessModel::processMessage(const QJsonObject& message)
 {
+    qDebug() << message;
+
     if (message.isEmpty())
         return;
 
     QJsonValue objectList = message["objects"];
 
-    QJsonArray playerObjects = objectList["event"].toObject()["board"].toObject()["squares"].toArray();
+    QJsonArray playerObjects = objectList["board"].toObject()["squares"].toArray();
 
     beginResetModel();
 
@@ -82,39 +84,4 @@ void ChessModel::processMessage(const QJsonObject& message)
     }
 
     endResetModel();
-
-
-
-    //        if (m_objects.contains(uuid)) {
-    //            oldUuidSet.insert(uuid);
-
-    //            int objectIndex = m_objectUuids.indexOf(uuid);
-
-    //            setData(index(objectIndex, 0), type, TypeRole);
-    //            setData(index(objectIndex, 0), rank, RankRole);
-    //            setData(index(objectIndex, 0), file, FileRole);
-    //            setData(index(objectIndex, 0), dark, DarkRole);
-    //        }
-    //        else {
-    //            ChessSquare* newObject = new ChessSquare();
-    //            newObject->setType(static_cast<ChessEnums::PieceType>(type));
-
-    //            beginInsertRows(QModelIndex(), m_objectUuids.length(), m_objectUuids.length());
-    //            m_objects[uuid] = newObject;
-    //            m_objectUuids.append(uuid);
-    //            endInsertRows();
-    //        }
-
-    //        newUuidSet.insert(uuid);
-    //    }
-
-    //    const QSet<QString> removedUuidSet = oldUuidSet - newUuidSet;
-
-    //    for (const QString& removedUuid : removedUuidSet) {
-    //        int objectIndex = m_objectUuids.indexOf(removedUuid);
-    //        beginRemoveRows(QModelIndex(), objectIndex, objectIndex);
-    //        m_objects.remove(removedUuid);
-    //        m_objectUuids.removeAll(removedUuid);
-    //        endRemoveRows();
-    //    }
 }

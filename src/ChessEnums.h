@@ -20,6 +20,17 @@ public:
     };
     Q_ENUM(PieceType)
 
+    enum Side {
+        Light,
+        Dark
+    };
+    Q_ENUM(Side)
+
+    static PieceType fromNotation(const QString &notation) {
+        if (notation == 'a')
+            return Pawn;
+    }
+
     static PieceType fromString(const QString &string) {
         if (string == "pawn")
             return Pawn;
@@ -48,3 +59,4 @@ private:
 };
 
 typedef ChessEnums::PieceType PieceType;
+typedef ChessEnums::Side Side;

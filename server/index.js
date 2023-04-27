@@ -41,7 +41,8 @@ var addPlayerToGameQueue = function (uuid, ws, game_id) {
 
             var gameInfo = _.cloneDeep(gamesWaitingForPlayers),
             infoToReturn = {
-                game_id: gameInfo.game_id
+                game_id: gameInfo.game_id,
+                game_client: chess.create()
             }
 
             games[infoToReturn.game_id] = infoToReturn
@@ -50,36 +51,6 @@ var addPlayerToGameQueue = function (uuid, ws, game_id) {
         }
     }
 }
-
-
-// Loop through ever websock and send the game info
-// This is the loop where we will be updating players positions..
-setInterval(function () {
-
-    // Loop through games and update player/ghost positions
-    _.forEach(games, function (game) {
-        const gameClient = chess.create();
-        gameClient.move("a4");
-        game.event = gameClient.getStatus();
-    })
-
-    if (!_.isEmpty(games)) {
-
-        wss.clients.forEach(function (socket) {
-            var game = games[socket.game_id]
-
-            try {
-                socket.send(JSON.stringify({
-                                               objects: game,
-                                               uuid: socket.uuid
-                                           }))
-            }
-            catch (err) {
-                // TODO what does this mean.. should we remove the player or something..
-            }
-        })
-    }
-}, GAME_TICK_LENGTH)
 
 wss.on('connection', function (ws) {
     ws.uuid = _generateUUID()
@@ -91,6 +62,23 @@ wss.on('connection', function (ws) {
         try {
             var obj = JSON.parse(message)
 
+            if (_.has(obj, 'move')) {
+
+                console.log("HERE")
+
+                if (_.has(games, ws.game_id)) {
+                    console.log("THERE")
+                    var game = games[ws.game_id],
+                    gameClient = game.game_client
+                    gameClient.move(obj.move)
+                    var gameStatus = gameClient.getStatus()
+
+                    ws.send(JSON.stringify({
+                                               objects: gameStatus
+                                           }))
+                }
+            }
+
             if (_.has(obj, 'command')) {
 
                 switch (obj.command) {
@@ -100,23 +88,15 @@ wss.on('connection', function (ws) {
                         addPlayerToGameQueue(ws.uuid, ws, obj.game_id) // pass in ws so that we can set ws.game_id once that is determined.. this is kind of a hack but I see no harm :)
                     }
                     break
-//                case "list":
-//                    var serverInfo = _.mapValues(games, function (gameObj) {
-//                        return {
-//                            game_id: gameObj.game_id,
-//                            map_name: gameObj.map_name,
-//                            number_of_players: _.keys(gameObj.players).length
-//                        }
-//                    })
-
-//                    ws.send(JSON.stringify({ info: serverInfo }))
-//                    break
-                default:
+                case "start":
                     if (_.has(games, ws.game_id)) {
                         var game = games[ws.game_id],
-                        player = game.players[ws.uuid]
+                        gameClient = game.game_client,
+                        gameStatus = gameClient.getStatus()
 
-                        player.requestedDirection = parseInt(obj.command)
+                        ws.send(JSON.stringify({
+                                                   objects: gameStatus
+                                               }))
                     }
                     break
                 }

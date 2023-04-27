@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick3D
 import QtQuick3D.Helpers
 import QtQuick.Controls
+import QtQuick.Layouts
 import QtWebSockets
 
 Window {
@@ -78,5 +79,23 @@ Window {
         }
 
         PieceSelector { }
+    }
+
+    RowLayout {
+
+        TextInput {
+            id: textInput
+            width: 200
+            height: 100
+        }
+
+        Button {
+            text: "Send"
+
+            onClicked: {
+                socket.sendTextMessage("{\"move\":\"" + textInput.text + "\"}")
+                textInput.clear()
+            }
+        }
     }
 }
