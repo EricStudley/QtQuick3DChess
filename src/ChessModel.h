@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ChessSquare.h"
+#include "ChessPiece.h"
 
 #include <QAbstractListModel>
 
@@ -20,6 +20,7 @@ public:
 
     int rowCount(const QModelIndex & parent = QModelIndex()) const;
     QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
+    bool setData(const QModelIndex &index, const QVariant &value, int role);
 
     Q_INVOKABLE void processMessage(const QJsonObject &message);
 
@@ -27,5 +28,5 @@ protected:
     QHash<int, QByteArray> roleNames() const;
 
 private:
-    QList<ChessSquare*> m_objects;
+    QList<ChessPiece*> m_objects;
 };

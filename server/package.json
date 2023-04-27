@@ -10,8 +10,8 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
-    "chess": "^1.1.0",
     "fs": "0.0.1-security",
+    "js-chess-engine": "^1.0.2",
     "lodash": "^4.17.21",
     "node-uuid": "^1.4.8",
     "ws": "^8.13.0"

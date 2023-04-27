@@ -4,7 +4,7 @@ var _generateUUID = function () {
     return uuid.v4()
 }
 
-import chess from 'chess'
+import jsChessEngine from 'js-chess-engine'
 import _ from 'lodash'
 import fs from 'fs'
 import uuid from 'node-uuid'
@@ -42,7 +42,7 @@ var addPlayerToGameQueue = function (uuid, ws, game_id) {
             var gameInfo = _.cloneDeep(gamesWaitingForPlayers),
             infoToReturn = {
                 game_id: gameInfo.game_id,
-                game_client: chess.create()
+                game_client: new jsChessEngine.Game()
             }
 
             games[infoToReturn.game_id] = infoToReturn
@@ -62,16 +62,17 @@ wss.on('connection', function (ws) {
         try {
             var obj = JSON.parse(message)
 
+            console.log(obj)
+
             if (_.has(obj, 'move')) {
 
-                console.log("HERE")
-
                 if (_.has(games, ws.game_id)) {
-                    console.log("THERE")
                     var game = games[ws.game_id],
                     gameClient = game.game_client
-                    gameClient.move(obj.move)
-                    var gameStatus = gameClient.getStatus()
+                    gameClient.move(obj.move.from, obj.move.to)
+                    var gameStatus = gameClient.exportJson()
+
+                    console.log("???")
 
                     ws.send(JSON.stringify({
                                                objects: gameStatus
@@ -92,7 +93,7 @@ wss.on('connection', function (ws) {
                     if (_.has(games, ws.game_id)) {
                         var game = games[ws.game_id],
                         gameClient = game.game_client,
-                        gameStatus = gameClient.getStatus()
+                        gameStatus = gameClient.exportJson()
 
                         ws.send(JSON.stringify({
                                                    objects: gameStatus

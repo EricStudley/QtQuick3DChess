@@ -26,32 +26,39 @@ public:
     };
     Q_ENUM(Side)
 
-    static PieceType fromNotation(const QString &notation) {
-        if (notation == 'a')
-            return Pawn;
-    }
+    static PieceType fromNotation(QChar &notation) {
+        notation = notation.toUpper();
 
-    static PieceType fromString(const QString &string) {
-        if (string == "pawn")
+        if (notation == 'P')
             return Pawn;
-        else if (string == "rook")
+        else if (notation == 'R')
             return Rook;
-        else if (string == "knight")
+        else if (notation == 'N')
             return Knight;
-        else if (string == "bishop")
+        else if (notation == 'B')
             return Bishop;
-        else if (string == "queen")
+        else if (notation == 'Q')
             return Queen;
-        else if (string == "king")
+        else if (notation == 'K')
             return King;
         else
             return None;
     }
 
-    static int pieceIndex(int rank, char file) {
-        int fileInt = (file - 'a');
-        int rowIndex = fileInt * ROW_COUNT;
-        return rowIndex + rank;
+    static int boardIndex(const QChar file, const int rank) {
+        int fileIndex = (file.toUpper().toLatin1() - 'A');
+        int rowIndex = fileIndex * ROW_COUNT;
+        return rowIndex + rank - 1;
+    }
+
+    static QChar file(const int boardIndex) {
+        int fileIndex = boardIndex % ROW_COUNT;
+        char file = 'A' + fileIndex;
+        return QChar(file);
+    }
+
+    static int rank(const int boardIndex) {
+        return qFloor(boardIndex / ROW_COUNT) + 1;
     }
 
 private:

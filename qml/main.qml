@@ -81,21 +81,12 @@ Window {
         PieceSelector { }
     }
 
-    RowLayout {
 
-        TextInput {
-            id: textInput
-            width: 200
-            height: 100
-        }
+    Button {
+        text: "Send"
 
-        Button {
-            text: "Send"
-
-            onClicked: {
-                socket.sendTextMessage("{\"move\":\"" + textInput.text + "\"}")
-                textInput.clear()
-            }
+        onClicked: {
+            socket.sendTextMessage("{\"move\": { \"from\":\"B2\", \"to\":\"B3\" } }")
         }
     }
 }
