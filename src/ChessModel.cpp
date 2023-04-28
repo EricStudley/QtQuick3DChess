@@ -9,14 +9,6 @@
 ChessModel::ChessModel(QObject* parent) :
     QAbstractListModel(parent)
 {
-    qDebug() << "Board Index for A1:" << ChessEnums::boardIndex('A', 1);
-    qDebug() << "Board Index for A1:" << ChessEnums::boardIndex('H', 8);
-
-    qDebug() << "File for index 0:" << ChessEnums::file(0);
-    qDebug() << "Rank for index 0:" << ChessEnums::rank(0);
-
-    qDebug() << "File for index 63:" << ChessEnums::file(63);
-    qDebug() << "Rank for index 63:" << ChessEnums::rank(63);
 }
 
 int ChessModel::rowCount([[maybe_unused]] const QModelIndex& parent) const
@@ -32,7 +24,9 @@ QVariant ChessModel::data(const QModelIndex& index, int role) const
     const int row = index.row();
     const ChessPiece* object = m_objects[row];
 
-    if (role == TypeRole)
+    if (role == BoardIndexRole)
+        return object->boardIndex();
+    else if (role == TypeRole)
         return object->type();
     else if (role == FileRole)
         return object->file();
@@ -52,10 +46,8 @@ bool ChessModel::setData(const QModelIndex& index, const QVariant& value, int ro
     const int row = index.row();
     ChessPiece* object = m_objects[row];
 
-    if (role == RankRole)
-        object->setRank(value.toInt());
-    else if (role == FileRole)
-        object->setFile(value.toChar());
+    if (role == BoardIndexRole)
+        object->setBoardIndex(value.toInt());
 
     emit dataChanged(index, index);
 
@@ -65,6 +57,7 @@ bool ChessModel::setData(const QModelIndex& index, const QVariant& value, int ro
 QHash<int, QByteArray> ChessModel::roleNames() const
 {
     QHash<int, QByteArray> roles;
+    roles[BoardIndexRole] = "role_boardIndex";
     roles[TypeRole] = "role_type";
     roles[RankRole] = "role_rank";
     roles[FileRole] = "role_file";
@@ -77,36 +70,32 @@ void ChessModel::processMessage(const QJsonObject& message)
     if (message.isEmpty())
         return;
 
-    QJsonValue objectList = message["objects"];
-
-    QJsonObject piecesObject = objectList["pieces"].toObject();
+    QJsonObject piecesObject = message["objects"]["pieces"].toObject();
 
     beginResetModel();
 
     m_objects.clear();
 
     for (const QString& pieceKey : piecesObject.keys()) {
-        QJsonValue value = piecesObject.value(pieceKey);
-
+        QJsonValue pieceValue = piecesObject.value(pieceKey);
         QChar file = pieceKey.front();
         int rank = pieceKey.back().digitValue();
+        QChar pieceNotation = pieceValue.toVariant().toString()[0];
+        PieceType type = ChessEnums::fromNotation(pieceNotation);
 
-//        ChessPiece* newObject = new ChessPiece(rank, file);
+        ChessPiece* newObject = new ChessPiece(type, pieceValue.toString()[0].isLower());
+        newObject->setRank(rank);
+        newObject->setFile(file);
 
-//        QJsonObject pieceObject = updatedObject["piece"].toObject();
-
-//        if (!pieceObject.isEmpty()) {
-//            QString typeString = pieceObject["type"].toString();
-//            PieceType type = ChessEnums::fromString(typeString);
-
-//            QJsonObject side = pieceObject["side"].toObject();
-//            QString sideName = side["name"].toString();
-//            ChessPiece piece = ChessPiece(type, sideName != "white");
-//            newObject->setPiece(piece);
-//        }
-
-//        m_objects += newObject;
+        m_objects += newObject;
     }
 
     endResetModel();
+}
+
+QString ChessModel::rankAndFile(const int boardIndex)
+{
+    QChar file = ChessEnums::file(boardIndex);
+    int rank = ChessEnums::rank(boardIndex);
+    return file + QString::number(rank);
 }

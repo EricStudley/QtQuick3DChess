@@ -2,21 +2,26 @@
 
 ChessPiece::ChessPiece(const PieceType &pieceType, const bool dark) :
     m_type(pieceType)
-  , m_dark(dark)
+    , m_dark(dark)
 {
-    updateBoardIndex();
 }
 
 void ChessPiece::setRank(const int rank)
 {
     m_rank = rank;
-    updateBoardIndex();
+
+    if (!m_file.isNull()) {
+        updateBoardIndex();
+    }
 }
 
 void ChessPiece::setFile(const QChar file)
 {
     m_file = file;
-    updateBoardIndex();
+
+    if (m_rank > 0) {
+        updateBoardIndex();
+    }
 }
 
 void ChessPiece::setBoardIndex(const int boardIndex)

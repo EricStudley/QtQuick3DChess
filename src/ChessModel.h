@@ -13,6 +13,7 @@ public:
 
     enum DisplayRoles {
         TypeRole = Qt::UserRole + 1,
+        BoardIndexRole,
         FileRole,
         RankRole,
         DarkRole
@@ -23,6 +24,7 @@ public:
     bool setData(const QModelIndex &index, const QVariant &value, int role);
 
     Q_INVOKABLE void processMessage(const QJsonObject &message);
+    Q_INVOKABLE QString rankAndFile(const int boardIndex);
 
 protected:
     QHash<int, QByteArray> roleNames() const;

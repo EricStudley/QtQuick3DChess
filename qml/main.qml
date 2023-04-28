@@ -62,31 +62,35 @@ Window {
 
         OrthographicCamera {
             id: perspectiveCamera
-            position: Qt.vector3d(0, -1300, 1000)
+            position: Qt.vector3d(0, 0, 1000)
+            //            position: Qt.vector3d(0, -1300, 1000)
             lookAtNode: scene
         }
 
         Node {
             id: scene
-            eulerRotation.z: -45
+            //            eulerRotation.z: -45
 
             ChessBoard {
                 x: (squareSize / 2) - (boardWidth / 2)
-                y: x
+                y: -(squareSize / 2) + (boardWidth / 2)
 
                 ChessPieces { }
             }
         }
 
-        PieceSelector { }
+        PieceSelector {
+            onPieceMoved: (from, to) => {
+                              socket.sendTextMessage("{\"move\": { \"from\":\""+ from +"\", \"to\":\""+ to +"\" } }")
+                          }
+        }
     }
-
 
     Button {
         text: "Send"
 
         onClicked: {
-            socket.sendTextMessage("{\"move\": { \"from\":\"B2\", \"to\":\"B3\" } }")
+            socket.sendTextMessage("{\"command\":\"start\"}")
         }
     }
 }

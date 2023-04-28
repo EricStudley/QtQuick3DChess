@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QObject>
+#include <QDebug>
 
 static auto constexpr ROW_COUNT = 8;
 
@@ -47,8 +48,8 @@ public:
 
     static int boardIndex(const QChar file, const int rank) {
         int fileIndex = (file.toUpper().toLatin1() - 'A');
-        int rowIndex = fileIndex * ROW_COUNT;
-        return rowIndex + rank - 1;
+        int rowIndex = rank * ROW_COUNT;
+        return fileIndex + rowIndex - ROW_COUNT;
     }
 
     static QChar file(const int boardIndex) {

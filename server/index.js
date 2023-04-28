@@ -13,7 +13,6 @@ import WebSocket, { WebSocketServer } from 'ws';
 var wss = new WebSocketServer({ port: 9001 }),
 games = {},
 gamesWaitingForPlayers = {},
-GAME_TICK_LENGTH = 200, //ms
 MAX_PLAYERS = 2 // static for now but can easily change..
 
 var addPlayerToGameQueue = function (uuid, ws, game_id) {
@@ -69,10 +68,10 @@ wss.on('connection', function (ws) {
                 if (_.has(games, ws.game_id)) {
                     var game = games[ws.game_id],
                     gameClient = game.game_client
-                    gameClient.move(obj.move.from, obj.move.to)
-                    var gameStatus = gameClient.exportJson()
 
-                    console.log("???")
+                    gameClient.move(obj.move.from, obj.move.to)
+
+                    var gameStatus = gameClient.exportJson()
 
                     ws.send(JSON.stringify({
                                                objects: gameStatus
@@ -102,6 +101,21 @@ wss.on('connection', function (ws) {
                     break
                 }
             }
+
+            wss.clients.forEach(function (socket) {
+                var game = games[socket.game_id],
+                gameClient = game.game_client,
+                gameStatus = gameClient.exportJson()
+
+                try {
+                    socket.send(JSON.stringify({
+                                                   objects: gameStatus
+                                               }))
+                }
+                catch (err) {
+                    console.log(e)
+                }
+            })
         }
         catch (e) {
             console.log(e)

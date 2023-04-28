@@ -4,12 +4,15 @@ import QtQuick3D.Helpers
 
 TapHandler {
 
+    signal pieceMoved(var from, var to)
+
     property var selectedPiece
 
-    function moveSelectedPiece(x, y) {
-        selectedPiece.x = x
-        selectedPiece.y = y
+    function moveSelectedPiece(boardIndex) {
         selectedPiece.highlighted = false
+        var fromRankAndFile = chessModel.rankAndFile(selectedPiece.boardIndex)
+        var toRankAndFile = chessModel.rankAndFile(boardIndex)
+        pieceMoved(fromRankAndFile, toRankAndFile)
         selectedPiece = undefined
     }
 
@@ -22,9 +25,9 @@ TapHandler {
                       if (objectHit.objectName) {
 
                           if (objectHit !== selectedPiece) {
+
                               if (selectedPiece) {
-                                  objectHit.visible = false
-                                  moveSelectedPiece(objectHit.x, objectHit.y)
+                                  moveSelectedPiece(objectHit.boardIndex)
                               }
                               else {
                                   selectedPiece = objectHit
@@ -37,8 +40,9 @@ TapHandler {
                           }
                       }
                       else {
+
                           if (selectedPiece) {
-                              moveSelectedPiece(objectHit.x, objectHit.y)
+                              moveSelectedPiece(objectHit.boardIndex)
                           }
                       }
                   }
