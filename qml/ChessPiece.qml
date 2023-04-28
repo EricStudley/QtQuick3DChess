@@ -19,15 +19,14 @@ Model {
             case PieceType.King: return "qrc:/res/meshes/king.mesh"
             }
 
-    property int rank: 0
-    property string file: ""
     property bool dark: false
     property bool highlighted: false
+
     property int boardIndex: 0
 
-    property int type
+    property string rankAndFile: ""
 
-    signal updateBoardIndex(var index)
+    property int type
 
     Behavior on x { SmoothedAnimation { } }
     Behavior on y { SmoothedAnimation { } }

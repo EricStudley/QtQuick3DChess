@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/res">
+        <file alias="wood.jpg">res/wood.jpg</file>
     </qresource>
     <qresource prefix="/res/meshes">
         <file alias="king.mesh">res/meshes/king.mesh</file>

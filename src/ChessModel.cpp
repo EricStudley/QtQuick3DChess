@@ -1,7 +1,6 @@
 #include "ChessModel.h"
 
 #include <QDebug>
-#include <QJsonObject>
 #include <QJsonArray>
 
 #include "ChessEnums.h"
@@ -25,33 +24,17 @@ QVariant ChessModel::data(const QModelIndex& index, int role) const
     const ChessPiece* object = m_objects[row];
 
     if (role == BoardIndexRole)
-        return object->boardIndex();
+        return object->chessSquare().boardIndex();
     else if (role == TypeRole)
         return object->type();
     else if (role == FileRole)
-        return object->file();
+        return object->chessSquare().file();
     else if (role == RankRole)
-        return object->rank();
+        return object->chessSquare().rank();
     else if (role == DarkRole)
         return object->dark();
 
     return {};
-}
-
-bool ChessModel::setData(const QModelIndex& index, const QVariant& value, int role)
-{
-    if (!index.isValid())
-        return false;
-
-    const int row = index.row();
-    ChessPiece* object = m_objects[row];
-
-    if (role == BoardIndexRole)
-        object->setBoardIndex(value.toInt());
-
-    emit dataChanged(index, index);
-
-    return true;
 }
 
 QHash<int, QByteArray> ChessModel::roleNames() const
@@ -70,7 +53,14 @@ void ChessModel::processMessage(const QJsonObject& message)
     if (message.isEmpty())
         return;
 
-    QJsonObject piecesObject = message["objects"]["pieces"].toObject();
+    QJsonObject objectsObject = message["objects"].toObject();
+
+    if (objectsObject.isEmpty())
+        return;
+
+    m_availableMoves = objectsObject["moves"].toObject().toVariantMap();
+
+    QJsonObject piecesObject = objectsObject["pieces"].toObject();
 
     beginResetModel();
 
@@ -84,8 +74,7 @@ void ChessModel::processMessage(const QJsonObject& message)
         PieceType type = ChessEnums::fromNotation(pieceNotation);
 
         ChessPiece* newObject = new ChessPiece(type, pieceValue.toString()[0].isLower());
-        newObject->setRank(rank);
-        newObject->setFile(file);
+        newObject->setChessSquare(ChessSquare(file, rank));
 
         m_objects += newObject;
     }
@@ -99,3 +88,20 @@ QString ChessModel::rankAndFile(const int boardIndex)
     int rank = ChessEnums::rank(boardIndex);
     return file + QString::number(rank);
 }
+
+QVariantMap ChessModel::availableMoves() const
+{
+    return m_availableMoves;
+}
+
+void ChessModel::setAvailableMoves(const QVariantMap &newAvailableMoves)
+{
+    if (m_availableMoves == newAvailableMoves)
+        return;
+    m_availableMoves = newAvailableMoves;
+    emit availableMovesChanged();
+}
+
+
+
+

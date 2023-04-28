@@ -20,7 +20,7 @@ Window {
 
     WebSocket {
         id: socket
-        url: "ws://localhost:9001"
+        url: "wss://qtquick3dchess.onrender.com/"
         active: true
 
         onStatusChanged: {
@@ -62,35 +62,28 @@ Window {
 
         OrthographicCamera {
             id: perspectiveCamera
-            position: Qt.vector3d(0, 0, 1000)
-            //            position: Qt.vector3d(0, -1300, 1000)
+            position: Qt.vector3d(0, -1300, 1000)
             lookAtNode: scene
         }
 
         Node {
             id: scene
-            //            eulerRotation.z: -45
+            eulerRotation.z: 180-45
 
             ChessBoard {
                 x: (squareSize / 2) - (boardWidth / 2)
                 y: -(squareSize / 2) + (boardWidth / 2)
+                selectedRankAndFile: pieceSelector.selectedPiece ? pieceSelector.selectedPiece.rankAndFile : ""
 
                 ChessPieces { }
             }
         }
 
         PieceSelector {
+            id: pieceSelector
             onPieceMoved: (from, to) => {
                               socket.sendTextMessage("{\"move\": { \"from\":\""+ from +"\", \"to\":\""+ to +"\" } }")
                           }
-        }
-    }
-
-    Button {
-        text: "Send"
-
-        onClicked: {
-            socket.sendTextMessage("{\"command\":\"start\"}")
         }
     }
 }

@@ -16,6 +16,8 @@ qt_add_executable(QtQuick3DChess
     src/ChessModel.cpp
     src/ChessPiece.h
     src/ChessPiece.cpp
+    src/ChessSquare.h
+    src/ChessSquare.cpp
     src/ChessEnums.h
 )
 

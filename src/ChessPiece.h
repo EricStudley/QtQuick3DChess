@@ -2,6 +2,7 @@
 
 #include <QObject>
 
+#include "ChessSquare.h"
 #include "ChessEnums.h"
 
 class ChessPiece
@@ -10,23 +11,14 @@ class ChessPiece
 public:
     ChessPiece(const PieceType &pieceType, const bool dark);
 
-    int boardIndex() const { return m_boardIndex; }
-    int rank() const { return m_rank; }
-    QChar file() const { return m_file; }
+    ChessSquare chessSquare() const { return m_chessSquare; }
     PieceType type() const { return m_type; }
     bool dark() const { return m_dark; }
 
-    void setBoardIndex(const int boardIndex);
-    void setRank(const int rank);
-    void setFile(const QChar file);
+    void setChessSquare(const ChessSquare chessSquare);
 
 private:
-    void updateBoardIndex();
-
-private:
-    int m_boardIndex;
-    int m_rank = 0;
-    QChar m_file;
+    ChessSquare m_chessSquare;
     PieceType m_type = PieceType::None;
     bool m_dark = false;
 };
