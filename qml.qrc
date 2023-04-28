@@ -1,9 +1,15 @@
 <RCC>
     <qresource prefix="/qml">
         <file alias="main.qml">qml/main.qml</file>
-        <file alias="ChessBoard.qml">qml/ChessBoard.qml</file>
-        <file alias="ChessPieces.qml">qml/ChessPieces.qml</file>
-        <file alias="ChessPiece.qml">qml/ChessPiece.qml</file>
-        <file alias="PieceSelector.qml">qml/PieceSelector.qml</file>
+    </qresource>
+    <qresource prefix="/qml/pages">
+        <file alias="Gameplay.qml">qml/pages/Gameplay.qml</file>
+        <file alias="Welcome.qml">qml/pages/Welcome.qml</file>
+    </qresource>
+    <qresource prefix="/qml/pages/gameplay">
+        <file alias="ChessBoard.qml">qml/pages/gameplay/ChessBoard.qml</file>
+        <file alias="ChessPieces.qml">qml/pages/gameplay/ChessPieces.qml</file>
+        <file alias="ChessPiece.qml">qml/pages/gameplay/ChessPiece.qml</file>
+        <file alias="PieceSelector.qml">qml/pages/gameplay/PieceSelector.qml</file>
     </qresource>
 </RCC>

@@ -10,6 +10,12 @@ class ChessEnums
     Q_GADGET
 
 public:
+    enum ChessPage {
+        Welcome,
+        Gameplay
+    };
+    Q_ENUM(ChessPage)
+
     enum PieceType {
         None = 0,
         Pawn,
