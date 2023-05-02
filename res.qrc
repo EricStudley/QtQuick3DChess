@@ -2,6 +2,9 @@
     <qresource prefix="/res">
         <file alias="wood.jpg">res/wood.jpg</file>
     </qresource>
+    <qresource prefix="/res/ico">
+        <file alias="chess.ico">res/ico/chess.ico</file>
+    </qresource>
     <qresource prefix="/res/meshes">
         <file alias="king.mesh">res/meshes/king.mesh</file>
         <file alias="queen.mesh">res/meshes/queen.mesh</file>

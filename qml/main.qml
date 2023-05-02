@@ -15,7 +15,7 @@ Window {
         id: stackView
         anchors { fill: parent }
 
-        Component.onCompleted: push(pageItem(ChessPage.Welcome))
+        Component.onCompleted: push(pageItem(ChessPage.Gameplay))
 
         function pageItem(page) {
             switch (page) {

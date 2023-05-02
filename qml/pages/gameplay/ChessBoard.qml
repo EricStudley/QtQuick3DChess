@@ -50,7 +50,7 @@ Node {
             property real y: -squareSize * Math.floor(index / rowCount)
 
             materials: PrincipledMaterial {
-                baseColor: highlighted ? "#00FF00" : dark ? "#000000" : "#FFFFFF"
+                baseColor: highlighted ? "#41cd52" : dark ? "#000000" : "#FFFFFF"
 
                 property string rankAndFile: chessModel.rankAndFile(boardIndex)
 

@@ -44,6 +44,8 @@ var addPlayerToGameQueue = function (uuid, ws, game_id) {
                 game_client: new jsChessEngine.Game()
             }
 
+            gamesWaitingForPlayers = { }
+
             games[infoToReturn.game_id] = infoToReturn
 
             ws.game_id = infoToReturn.game_id // set the websocket.game_id so what we can loop through all of our websockets, look at the socket.game_id then know to send them that exact game
@@ -103,17 +105,20 @@ wss.on('connection', function (ws) {
             }
 
             wss.clients.forEach(function (socket) {
-                var game = games[socket.game_id],
-                gameClient = game.game_client,
-                gameStatus = gameClient.exportJson()
+                var game = games[socket.game_id]
 
-                try {
-                    socket.send(JSON.stringify({
-                                                   objects: gameStatus
-                                               }))
-                }
-                catch (err) {
-                    console.log(e)
+                if (game) {
+                    var gameClient = game.game_client,
+                    gameStatus = gameClient.exportJson()
+
+                    try {
+                        socket.send(JSON.stringify({
+                                                       objects: gameStatus
+                                                   }))
+                    }
+                    catch (err) {
+                        console.log(e)
+                    }
                 }
             })
         }
