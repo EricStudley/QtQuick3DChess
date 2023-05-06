@@ -9,6 +9,7 @@ class ChessModel : public QAbstractListModel
 {
     Q_OBJECT
     Q_PROPERTY(QVariantMap availableMoves READ availableMoves WRITE setAvailableMoves NOTIFY availableMovesChanged)
+    Q_PROPERTY(QVariantList serverNameList READ serverNameList WRITE setServerNameList NOTIFY serverNameListChanged)
 
 public:
     explicit ChessModel(QObject *parent = nullptr);
@@ -28,12 +29,15 @@ public:
     Q_INVOKABLE QString rankAndFile(const int boardIndex);
 
     // Q_PROPERTY READ
+    QVariantList serverNameList() const;
     QVariantMap availableMoves() const;
 
     // Q_PROPERTY WRITE
+    void setServerNameList(const QVariantList &newServerNameList);
     void setAvailableMoves(const QVariantMap &newAvailableMoves);
 
 signals:
+    void serverNameListChanged();
     void availableMovesChanged();
 
 protected:
@@ -43,5 +47,6 @@ private:
     QList<ChessPiece*> m_objects;
 
     // Q_PROPERTY MEMBER
+    QVariantList m_serverNameList;
     QVariantMap m_availableMoves;
 };

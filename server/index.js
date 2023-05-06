@@ -1,5 +1,13 @@
 'use strict';
 
+Set.prototype.find = function(cb) {
+    for (const e of this) {
+        if (cb(e)) {
+            return e;
+        }
+    }
+}
+
 var _generateUUID = function () {
     return uuid.v4()
 }
@@ -11,44 +19,66 @@ import uuid from 'node-uuid'
 import WebSocket, { WebSocketServer } from 'ws';
 
 var wss = new WebSocketServer({ port: 9001 }),
-games = {},
-gamesWaitingForPlayers = {},
-MAX_PLAYERS = 2 // static for now but can easily change..
+runningServerList = {},
+openServerList = {}
 
-var addPlayerToGameQueue = function (uuid, ws, game_id) {
+var createServer = function (ws, serverName) {
+    ws.serverUuid = _generateUUID()
 
-    if (_.isEmpty(gamesWaitingForPlayers)) {
-        var game_id = _.isString(game_id) ? game_id : _generateUUID()
+    openServerList[serverName] = {
+        serverUuid: ws.serverUuid,
+        players: [ws.uuid]
+    }
+}
 
-        ws.game_id = game_id
+var joinServer = function (ws, serverName) {
+    var server = _.cloneDeep(openServerList[serverName]),
+    serverInfo = {
+        serverUuid: server.serverUuid,
+        gameClient: new jsChessEngine.Game()
+    }
+
+    delete openServerList[serverName]
+
+    runningServerList[serverInfo.serverUuid] = serverInfo
+
+    ws.serverUuid = serverInfo.serverUuid
+}
+
+var addPlayerToGameQueue = function (uuid, ws, serverUuid) {
+
+    if (_.isEmpty(openServerList)) {
+        var serverUuid = _.isString(serverUuid) ? serverUuid : _generateUUID()
+
+        ws.serverUuid = serverUuid
         ws.send(JSON.stringify({
                                    info: {
                                        uuid: uuid
                                    }
                                }))
 
-        gamesWaitingForPlayers = {
-            game_id: game_id,
+        openServerList = {
+            serverUuid: serverUuid,
             players: [uuid]
         }
     }
-    else { // other players are also waiting to join a game on this map
-        gamesWaitingForPlayers.players.push(uuid)
+    else {
+        openServerList.players.push(uuid)
 
-        if (gamesWaitingForPlayers.players.length >= MAX_PLAYERS) {
+        if (openServerList.players.length >= MAX_PLAYERS) {
             console.log('There are ' + MAX_PLAYERS + ' people waiting to play. Starting game.')
 
-            var gameInfo = _.cloneDeep(gamesWaitingForPlayers),
+            var gameInfo = _.cloneDeep(openServerList),
             infoToReturn = {
-                game_id: gameInfo.game_id,
+                serverUuid: gameInfo.serverUuid,
                 game_client: new jsChessEngine.Game()
             }
 
-            gamesWaitingForPlayers = { }
+            openServerList = { }
 
-            games[infoToReturn.game_id] = infoToReturn
+            runningServerList[infoToReturn.serverUuid] = infoToReturn
 
-            ws.game_id = infoToReturn.game_id // set the websocket.game_id so what we can loop through all of our websockets, look at the socket.game_id then know to send them that exact game
+            ws.serverUuid = infoToReturn.serverUuid // set the websocket.serverUuid so what we can loop through all of our websockets, look at the socket.serverUuid then know to send them that exact game
         }
     }
 }
@@ -67,8 +97,8 @@ wss.on('connection', function (ws) {
 
             if (_.has(obj, 'move')) {
 
-                if (_.has(games, ws.game_id)) {
-                    var game = games[ws.game_id],
+                if (_.has(runningServerList, ws.serverUuid)) {
+                    var game = runningServerList[ws.serverUuid],
                     gameClient = game.game_client
 
                     gameClient.move(obj.move.from, obj.move.to)
@@ -84,41 +114,43 @@ wss.on('connection', function (ws) {
             if (_.has(obj, 'command')) {
 
                 switch (obj.command) {
+                case "createServer":
+                    if (!ws.already_joined) {
+                        ws.already_joined = true
+                        createServer(ws, obj.serverName)
+                    }
+                    break
+                case "joinServer":
+                    if (!ws.already_joined) {
+                        ws.already_joined = true
+                        joinServer(ws, obj.serverName)
+                    }
+                    break
+                case "sendServerList":
+                    ws.send(JSON.stringify({
+                                               serverList: Object.keys(openServerList)
+                                           }))
+                    break
                 case "join":
                     if (!ws.already_joined) {
                         ws.already_joined = true
-                        addPlayerToGameQueue(ws.uuid, ws, obj.game_id) // pass in ws so that we can set ws.game_id once that is determined.. this is kind of a hack but I see no harm :)
-                    }
-                    break
-                case "start":
-                    if (_.has(games, ws.game_id)) {
-                        var game = games[ws.game_id],
-                        gameClient = game.game_client,
-                        gameStatus = gameClient.exportJson()
-
-                        ws.send(JSON.stringify({
-                                                   objects: gameStatus
-                                               }))
+                        addPlayerToGameQueue(ws.uuid, ws, obj.serverUuid)
                     }
                     break
                 }
             }
 
             wss.clients.forEach(function (socket) {
-                var game = games[socket.game_id]
+                var game = runningServerList[socket.serverUuid]
 
                 if (game) {
                     var gameClient = game.game_client,
                     gameStatus = gameClient.exportJson()
 
-                    try {
-                        socket.send(JSON.stringify({
-                                                       objects: gameStatus
-                                                   }))
-                    }
-                    catch (err) {
-                        console.log(e)
-                    }
+                    socket.send(JSON.stringify({
+                                                   objects: gameStatus,
+                                                   serverList: Object.keys(openServerList)
+                                               }))
                 }
             })
         }

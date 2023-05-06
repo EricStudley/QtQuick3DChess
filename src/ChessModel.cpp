@@ -48,8 +48,43 @@ QHash<int, QByteArray> ChessModel::roleNames() const
     return roles;
 }
 
+QVariantList ChessModel::serverNameList() const
+{
+    return m_serverNameList;
+}
+
+QVariantMap ChessModel::availableMoves() const
+{
+    return m_availableMoves;
+}
+
+void ChessModel::setServerNameList(const QVariantList &newServerNameList)
+{
+    if (m_serverNameList == newServerNameList)
+        return;
+    m_serverNameList = newServerNameList;
+    emit serverNameListChanged();
+}
+
+void ChessModel::setAvailableMoves(const QVariantMap &newAvailableMoves)
+{
+    if (m_availableMoves == newAvailableMoves)
+        return;
+    m_availableMoves = newAvailableMoves;
+    emit availableMovesChanged();
+}
+
 void ChessModel::processMessage(const QJsonObject& message)
 {
+    if (message.isEmpty())
+        return;
+
+    QJsonArray serverList = message["serverList"].toArray();
+
+    if (!serverList.isEmpty()) {
+        qDebug() << serverList.toVariantList();
+    }
+
     if (message.isEmpty())
         return;
 
@@ -88,20 +123,3 @@ QString ChessModel::rankAndFile(const int boardIndex)
     int rank = ChessEnums::rank(boardIndex);
     return file + QString::number(rank);
 }
-
-QVariantMap ChessModel::availableMoves() const
-{
-    return m_availableMoves;
-}
-
-void ChessModel::setAvailableMoves(const QVariantMap &newAvailableMoves)
-{
-    if (m_availableMoves == newAvailableMoves)
-        return;
-    m_availableMoves = newAvailableMoves;
-    emit availableMovesChanged();
-}
-
-
-
-

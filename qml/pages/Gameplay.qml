@@ -3,7 +3,6 @@ import QtQuick3D
 import QtQuick3D.Helpers
 import QtQuick.Controls
 import QtQuick.Layouts
-import QtWebSockets
 
 import Chess
 
@@ -14,21 +13,6 @@ Item {
     property int rowCount: 8
     property int squareCount: 64
     property int boardWidth: squareSize * rowCount
-
-    WebSocket {
-        id: socket
-        url: "wss://qtquick3dchess.onrender.com/"
-        active: true
-
-        onStatusChanged: {
-            if (socket.status === WebSocket.Open) {
-                console.log("Client connected.")
-                socket.sendTextMessage("{\"command\":\"join\"}")
-            }
-        }
-
-        onTextMessageReceived: (message) => chessModel.processMessage(JSON.parse(message))
-    }
 
     View3D {
         id: view3D
@@ -51,10 +35,7 @@ Item {
 
         DirectionalLight {
             eulerRotation.y: -45
-            ambientColor: Qt.darker("slategrey")
-            castsShadow: true
-            shadowFactor: 50
-            shadowMapQuality: Light.ShadowMapQualityHigh
+            ambientColor: Qt.darker("white")
         }
 
         OrthographicCamera {
@@ -79,7 +60,7 @@ Item {
         PieceSelector {
             id: pieceSelector
             onPieceMoved: (from, to) => {
-                              socket.sendTextMessage("{\"move\": { \"from\":\""+ from +"\", \"to\":\""+ to +"\" } }")
+                              chessController.sendTextMessage("{\"move\": { \"from\":\""+ from +"\", \"to\":\""+ to +"\" } }")
                           }
         }
     }

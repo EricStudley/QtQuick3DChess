@@ -13,6 +13,8 @@ public:
     explicit ChessController(ChessModel *chessModel, QObject *parent = nullptr);
 
 signals:
+    void sendTextMessage(const QString &textMessage);
+
     void pushPage(ChessEnums::ChessPage page);
     void popPage();
     void replacePage(ChessEnums::ChessPage page);

@@ -10,7 +10,6 @@ find_package(Qt6 6.2 COMPONENTS Quick REQUIRED)
 
 qt_add_executable(QtQuick3DChess
     qml.qrc
-    res.qrc
     src/main.cpp
     src/ChessModel.h
     src/ChessModel.cpp
